@@ -20,6 +20,10 @@ rootProject.name = "beam"
 
 include ":release"
 
+include "testpipeline"
+project(":testpipeline").dir = file("testpipeline")
+
+
 include "beam-examples-java"
 project(":beam-examples-java").dir = file("examples/java")
 include "beam-model-fn-execution"
