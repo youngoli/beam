@@ -55,10 +55,13 @@ import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.vendor.protobuf.v3.com.google.protobuf.ByteString;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Runs the {@link PTransformTranslation#SPLITTABLE_PROCESS_ELEMENTS_URN} transform. */
 public class SplittableProcessElementsRunner<InputT, RestrictionT, OutputT>
     implements DoFnPTransformRunnerFactory.DoFnPTransformRunner<KV<InputT, RestrictionT>> {
+  private static final Logger LOG = LoggerFactory.getLogger(BeamFnDataWriteRunner.class);
   /** A registrar which provides a factory to handle Java {@link DoFn}s. */
   @AutoService(PTransformRunnerFactory.Registrar.class)
   public static class Registrar implements PTransformRunnerFactory.Registrar {
@@ -145,11 +148,13 @@ public class SplittableProcessElementsRunner<InputT, RestrictionT, OutputT>
 
   @Override
   public void startBundle() {
+    LOG.debug("DANOLIVEIRA: [SplittableProcessElementsRunner] startBundle executed.");
     doFnInvoker.invokeStartBundle(startBundleContext);
   }
 
   @Override
   public void processElement(WindowedValue<KV<InputT, RestrictionT>> elem) {
+    LOG.debug("DANOLIVEIRA: [SplittableProcessElementsRunner] processElement executed.");
     processElementTyped(elem);
   }
 
@@ -252,11 +257,13 @@ public class SplittableProcessElementsRunner<InputT, RestrictionT, OutputT>
   @Override
   public void processTimer(
       String timerId, TimeDomain timeDomain, WindowedValue<KV<Object, Timer>> input) {
+    LOG.debug("DANOLIVEIRA: [SplittableProcessElementsRunner] processTimer executed.");
     throw new UnsupportedOperationException("Timers are unsupported in a SplittableDoFn.");
   }
 
   @Override
   public void finishBundle() {
+    LOG.debug("DANOLIVEIRA: [SplittableProcessElementsRunner] finishBundle executed.");
     doFnInvoker.invokeFinishBundle(finishBundleContext);
   }
 

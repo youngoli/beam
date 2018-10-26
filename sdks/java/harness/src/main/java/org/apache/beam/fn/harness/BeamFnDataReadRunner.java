@@ -169,6 +169,7 @@ public class BeamFnDataReadRunner<OutputT> {
   }
 
   public void registerInputLocation() {
+    LOG.debug("DANOLIVEIRA: [BeamFnDataReadRunner] registerInputLocation as the StartFunction.");
     this.readFuture =
         beamFnDataClient.receive(
             apiServiceDescriptor,
@@ -178,10 +179,11 @@ public class BeamFnDataReadRunner<OutputT> {
   }
 
   public void blockTillReadFinishes() throws Exception {
+    LOG.debug("DANOLIVEIRA: [BeamFnDataReadRunner] registerInputLocation as the StartFunction.");
+    readFuture.awaitCompletion();
     LOG.debug(
-        "Waiting for process bundle instruction {} and target {} to close.",
+        "DANOLIVEIRA: [BeamFnDataReadRunner] Process bundle instruction {} and target {} successfully closed.",
         processBundleInstructionIdSupplier.get(),
         inputTarget);
-    readFuture.awaitCompletion();
   }
 }

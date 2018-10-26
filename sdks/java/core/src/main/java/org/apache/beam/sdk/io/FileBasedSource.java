@@ -254,15 +254,23 @@ public abstract class FileBasedSource<T> extends OffsetBasedSource<T> {
     // split a FileBasedSource based on a file pattern to FileBasedSources based on full single
     // files. For files that can be efficiently seeked, we further split FileBasedSources based on
     // those files to FileBasedSources based on sub ranges of single files.
+    LOG.debug("DANOLIVEIRA: [FileBasedSource] split starting.");
     String fileOrPattern = fileOrPatternSpec.get();
 
     if (mode == Mode.FILEPATTERN) {
+      LOG.debug("DANOLIVEIRA: [FileBasedSource] split: if (mode == Mode.FILEPATTERN) TRUE");
       long startTime = System.currentTimeMillis();
+      LOG.debug("DANOLIVEIRA: [FileBasedSource] split: long startTime = System.currentTimeMillis();");
       List<Metadata> expandedFiles =
           FileSystems.match(fileOrPattern, emptyMatchTreatment).metadata();
+      LOG.debug("DANOLIVEIRA: [FileBasedSource] split: List<Metadata> expandedFiles =\n" +
+          "          FileSystems.match(fileOrPattern, emptyMatchTreatment).metadata();");
       List<FileBasedSource<T>> splitResults = new ArrayList<>(expandedFiles.size());
+      LOG.debug("DANOLIVEIRA: [FileBasedSource] split: List<FileBasedSource<T>> splitResults = new ArrayList<>(expandedFiles.size());");
       for (Metadata metadata : expandedFiles) {
+        LOG.debug("DANOLIVEIRA: [FileBasedSource] split: for (Metadata metadata : expandedFiles) {");
         FileBasedSource<T> split = createForSubrangeOfFile(metadata, 0, metadata.sizeBytes());
+        LOG.debug("DANOLIVEIRA: [FileBasedSource] split: FileBasedSource<T> split = createForSubrangeOfFile(metadata, 0, metadata.sizeBytes());");
         verify(
             split.getMode() == Mode.SINGLE_FILE_OR_SUBRANGE,
             "%s.createForSubrangeOfFile must return a source in mode %s",
@@ -272,6 +280,7 @@ public abstract class FileBasedSource<T> extends OffsetBasedSource<T> {
         // of recursion. This will break a single file into multiple splits when the file is
         // splittable and larger than the desired bundle size.
         splitResults.addAll(split.split(desiredBundleSizeBytes, options));
+        LOG.debug("DANOLIVEIRA: [FileBasedSource] split: splitResults.addAll(split.split(desiredBundleSizeBytes, options));");
       }
       LOG.info(
           "Splitting filepattern {} into bundles of size {} took {} ms "
@@ -283,7 +292,9 @@ public abstract class FileBasedSource<T> extends OffsetBasedSource<T> {
           splitResults.size());
       return splitResults;
     } else {
+      LOG.debug("DANOLIVEIRA: [FileBasedSource] split: if (mode == Mode.FILEPATTERN) FALSE");
       if (isSplittable()) {
+        LOG.debug("DANOLIVEIRA: [FileBasedSource] split: if isSplittable TRUE");
         @SuppressWarnings("unchecked")
         List<FileBasedSource<T>> splits =
             (List<FileBasedSource<T>>) super.split(desiredBundleSizeBytes, options);

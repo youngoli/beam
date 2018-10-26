@@ -50,4 +50,5 @@ run {
   } else {
     jvmArgs += ["-Dorg.slf4j.simpleLogger.log.org.apache.beam.vendor=info"]
   }
+  jvmArgs += ["-Dorg.slf4j.simpleLogger.log.org.apache.beam.vendor.grpc.v1.io.grpc.netty=info"]
 }

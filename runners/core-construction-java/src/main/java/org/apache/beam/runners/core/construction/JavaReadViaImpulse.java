@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.CoderException;
@@ -42,6 +43,8 @@ import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PValue;
 import org.apache.beam.sdk.values.TupleTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Read from a Java {@link BoundedSource} via the {@link Impulse} and {@link ParDo} primitive
@@ -112,6 +115,7 @@ public class JavaReadViaImpulse {
 
   @VisibleForTesting
   static class SplitBoundedSourceFn<T> extends DoFn<byte[], BoundedSource<T>> {
+    private static final Logger LOG = LoggerFactory.getLogger(SplitBoundedSourceFn.class);
     private final BoundedSource<T> source;
     private final long bundleSize;
 
@@ -122,9 +126,15 @@ public class JavaReadViaImpulse {
 
     @ProcessElement
     public void splitSource(ProcessContext ctxt) throws Exception {
-      for (BoundedSource<T> split : source.split(bundleSize, ctxt.getPipelineOptions())) {
+      LOG.debug("DANOLIVEIRA: [SplitBoundedSourceFn] Starting splitSource with source {}", source);
+      List<? extends BoundedSource<T>> splits = source.split(bundleSize, ctxt.getPipelineOptions());
+      LOG.debug("DANOLIVEIRA: [SplitBoundedSourceFn] splitSource has split BoundedSource: Size is {}", splits.size());
+      for (BoundedSource<T> split : splits) {
+        LOG.debug("DANOLIVEIRA: [SplitBoundedSourceFn] splitSource created split: {}", split);
         ctxt.output(split);
       }
+
+      LOG.debug("DANOLIVEIRA: [SplitBoundedSourceFn] splitSource done.");
     }
   }
 

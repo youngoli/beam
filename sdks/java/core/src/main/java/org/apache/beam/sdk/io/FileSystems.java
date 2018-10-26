@@ -62,10 +62,13 @@ import org.apache.beam.sdk.io.fs.ResourceId;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.util.common.ReflectHelpers;
 import org.apache.beam.sdk.values.KV;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Clients facing {@link FileSystem} utility. */
 @Experimental(Kind.FILESYSTEM)
 public class FileSystems {
+  private static final Logger LOG = LoggerFactory.getLogger(FileSystems.class);
 
   public static final String DEFAULT_SCHEME = "file";
   private static final Pattern FILE_SCHEME_PATTERN =
@@ -137,6 +140,7 @@ public class FileSystems {
    * for bulk API calls to remote filesystems.
    */
   public static MatchResult match(String spec) throws IOException {
+    LOG.debug("DANOLIVEIRA: [FileSystems] match: (without emptyMatchTreatment) starting, with spec {}", spec);
     List<MatchResult> matches = match(Collections.singletonList(spec));
     verify(
         matches.size() == 1,
@@ -149,12 +153,14 @@ public class FileSystems {
   /** Like {@link #match(String)}, but with a configurable {@link EmptyMatchTreatment}. */
   public static MatchResult match(String spec, EmptyMatchTreatment emptyMatchTreatment)
       throws IOException {
+    LOG.debug("DANOLIVEIRA: [FileSystems] match: (with emptyMatchTreatment) starting");
     MatchResult res = match(spec);
     return maybeAdjustEmptyMatchResult(spec, res, emptyMatchTreatment);
   }
 
   private static MatchResult maybeAdjustEmptyMatchResult(
       String spec, MatchResult res, EmptyMatchTreatment emptyMatchTreatment) throws IOException {
+    LOG.debug("DANOLIVEIRA: [FileSystems] maybeAdjustEmptyMatchResult: starting");
     if (res.status() == Status.NOT_FOUND
         || (res.status() == Status.OK && res.metadata().isEmpty())) {
       boolean notFoundAllowed =
@@ -426,6 +432,7 @@ public class FileSystems {
   }
 
   private static String getOnlyScheme(List<String> specs) {
+    LOG.debug("DANOLIVEIRA: [FileSystems] getOnlyScheme: starting");
     checkArgument(!specs.isEmpty(), "Expect specs are not empty.");
     Set<String> schemes = FluentIterable.from(specs).transform(FileSystems::parseScheme).toSet();
     return Iterables.getOnlyElement(schemes);
@@ -449,12 +456,18 @@ public class FileSystems {
   /** Internal method to get {@link FileSystem} for {@code scheme}. */
   @VisibleForTesting
   static FileSystem getFileSystemInternal(String scheme) {
+    LOG.debug("DANOLIVEIRA: [FileSystems] getFileSystemInternal: starting with scheme {}", scheme);
     String lowerCaseScheme = scheme.toLowerCase();
+    LOG.debug("DANOLIVEIRA: [FileSystems] getFileSystemInternal: String lowerCaseScheme = scheme.toLowerCase();");
     Map<String, FileSystem> schemeToFileSystem = SCHEME_TO_FILESYSTEM.get();
+    LOG.debug("DANOLIVEIRA: [FileSystems] getFileSystemInternal: Map<String, FileSystem> schemeToFileSystem = SCHEME_TO_FILESYSTEM.get();");
     FileSystem rval = schemeToFileSystem.get(lowerCaseScheme);
+    LOG.debug("DANOLIVEIRA: [FileSystems] getFileSystemInternal: FileSystem rval = schemeToFileSystem.get(lowerCaseScheme);");
     if (rval == null) {
+      LOG.debug("DANOLIVEIRA: [FileSystems] getFileSystemInternal: No filesystem found for scheme {}", scheme);
       throw new IllegalArgumentException("No filesystem found for scheme " + scheme);
     }
+    LOG.debug("DANOLIVEIRA: [FileSystems] getFileSystemInternal: return rval");
     return rval;
   }
 

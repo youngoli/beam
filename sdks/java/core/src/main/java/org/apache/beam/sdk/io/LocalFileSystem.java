@@ -37,10 +37,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -85,8 +82,12 @@ class LocalFileSystem extends FileSystem<LocalResourceId> {
 
   @Override
   protected List<MatchResult> match(List<String> specs) throws IOException {
+    LOG.debug("DANOLIVEIRA: [LocalFileSystem] match: starting, with specs {}", specs);
     ImmutableList.Builder<MatchResult> ret = ImmutableList.builder();
+    LOG.debug("DANOLIVEIRA: [LocalFileSystem] match: ImmutableList.Builder<MatchResult> ret = ImmutableList.builder();");
     for (String spec : specs) {
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] match: for (String spec : specs) {");
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] match: for loop with spec = {}", spec);
       ret.add(matchOne(spec));
     }
     return ret.build();
@@ -201,11 +202,14 @@ class LocalFileSystem extends FileSystem<LocalResourceId> {
   }
 
   private MatchResult matchOne(String spec) throws IOException {
+    LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: starting for spec = {}", spec);
     if (spec.toLowerCase().startsWith("file:")) {
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: if (spec.toLowerCase().startsWith(\"file:\")) {");
       spec = spec.substring("file:".length());
     }
 
     if (SystemUtils.IS_OS_WINDOWS) {
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: if (SystemUtils.IS_OS_WINDOWS) {");
       List<String> prefixes = Arrays.asList("///", "/");
       for (String prefix : prefixes) {
         if (spec.toLowerCase().startsWith(prefix)) {
@@ -216,11 +220,13 @@ class LocalFileSystem extends FileSystem<LocalResourceId> {
 
     File file = Paths.get(spec).toFile();
     if (file.exists()) {
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: if (file.exists()) {");
       return MatchResult.create(Status.OK, ImmutableList.of(toMetadata(file)));
     }
 
     File parent = file.getAbsoluteFile().getParentFile();
     if (!parent.exists()) {
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: if (!parent.exists()) {");
       return MatchResult.create(Status.NOT_FOUND, Collections.emptyList());
     }
 
@@ -234,12 +240,22 @@ class LocalFileSystem extends FileSystem<LocalResourceId> {
     String pathToMatch =
         file.getAbsolutePath()
             .replaceAll(Matcher.quoteReplacement("\\"), Matcher.quoteReplacement("\\\\"));
+    LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: String pathToMatch = {}", pathToMatch);
 
     final PathMatcher matcher =
         java.nio.file.FileSystems.getDefault().getPathMatcher("glob:" + pathToMatch);
+    LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: final PathMatcher matcher =");
 
     // TODO: Avoid iterating all files: https://issues.apache.org/jira/browse/BEAM-1309
     Iterable<File> files = com.google.common.io.Files.fileTreeTraverser().preOrderTraversal(parent);
+    LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: Iterable<File> files = com.google.common.io.Files.fileTreeTraverser().preOrderTraversal(parent);");
+    LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: parent = {}", parent.getCanonicalPath());
+    Iterator<File> filesIter = files.iterator();
+    while (filesIter.hasNext()) {
+      File fileInFiles = filesIter.next();
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: file in files = {}", fileInFiles.getCanonicalPath());
+    }
+    LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: files = {}", files);
     Iterable<File> matchedFiles =
         StreamSupport.stream(files.spliterator(), false)
             .filter(
@@ -248,17 +264,21 @@ class LocalFileSystem extends FileSystem<LocalResourceId> {
                         input -> matcher.matches(input.toPath()))
                     ::apply)
             .collect(Collectors.toList());
+    LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: Iterable<File> matchedFiles =");
 
     List<Metadata> result = Lists.newLinkedList();
     for (File match : matchedFiles) {
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: for (File match : matchedFiles) {");
       result.add(toMetadata(match));
     }
     if (result.isEmpty()) {
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: if (result.isEmpty()) {");
       // TODO: consider to return Status.OK for globs.
       return MatchResult.create(
           Status.NOT_FOUND,
           new FileNotFoundException(String.format("No files found for spec: %s.", spec)));
     } else {
+      LOG.debug("DANOLIVEIRA: [LocalFileSystem] matchOne: if (result.isEmpty()) , else");
       return MatchResult.create(Status.OK, result);
     }
   }

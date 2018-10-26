@@ -156,6 +156,7 @@ public class BeamFnDataWriteRunner<InputT> {
   }
 
   public void registerForOutput() {
+    LOG.debug("DANOLIVEIRA: registerForOutput executed. [BeamFnDataWriteRunner with target {}]", outputTarget);
     consumer =
         beamFnDataClientFactory.send(
             apiServiceDescriptor,
@@ -164,10 +165,12 @@ public class BeamFnDataWriteRunner<InputT> {
   }
 
   public void close() throws Exception {
+    LOG.debug("DANOLIVEIRA: close executed. [BeamFnDataWriteRunner with target {}]", outputTarget);
     consumer.close();
   }
 
   public void consume(WindowedValue<InputT> value) throws Exception {
+    LOG.debug("DANOLIVEIRA: consume executed. [BeamFnDataWriteRunner with target {}]", outputTarget);
     consumer.accept(value);
   }
 }

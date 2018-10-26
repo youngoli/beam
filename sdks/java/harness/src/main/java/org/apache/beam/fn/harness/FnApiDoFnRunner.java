@@ -65,6 +65,8 @@ import org.apache.beam.sdk.values.TupleTag;
 import org.joda.time.DateTimeUtils;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link DoFnRunner} specific to integrating with the Fn Api. This is to remove the layers of
@@ -73,6 +75,7 @@ import org.joda.time.Instant;
  */
 public class FnApiDoFnRunner<InputT, OutputT>
     implements DoFnPTransformRunnerFactory.DoFnPTransformRunner<InputT> {
+  private static final Logger LOG = LoggerFactory.getLogger(FnApiDoFnRunner.class);
   /** A registrar which provides a factory to handle Java {@link DoFn}s. */
   @AutoService(PTransformRunnerFactory.Registrar.class)
   public static class Registrar implements PTransformRunnerFactory.Registrar {
@@ -200,6 +203,7 @@ public class FnApiDoFnRunner<InputT, OutputT>
 
   @Override
   public void startBundle() {
+    LOG.debug("DANOLIVEIRA: [FnApiDoFnRunner] startBundle executed.");
     this.stateAccessor =
         new FnApiStateAccessor(
             context.pipelineOptions,
@@ -217,8 +221,10 @@ public class FnApiDoFnRunner<InputT, OutputT>
 
   @Override
   public void processElement(WindowedValue<InputT> elem) {
+    LOG.debug("DANOLIVEIRA: [FnApiDoFnRunner] processElement executed.");
     currentElement = elem;
     try {
+      LOG.debug("DANOLIVEIRA: [FnApiDoFnRunner] processElement trying with DoFnInvoker: {}", doFnInvoker);
       Iterator<BoundedWindow> windowIterator =
           (Iterator<BoundedWindow>) elem.getWindows().iterator();
       while (windowIterator.hasNext()) {
@@ -229,11 +235,13 @@ public class FnApiDoFnRunner<InputT, OutputT>
       currentElement = null;
       currentWindow = null;
     }
+    LOG.debug("DANOLIVEIRA: [FnApiDoFnRunner] processElement Finished.");
   }
 
   @Override
   public void processTimer(
       String timerId, TimeDomain timeDomain, WindowedValue<KV<Object, Timer>> timer) {
+    LOG.debug("DANOLIVEIRA: [FnApiDoFnRunner] processTimer executed.");
     currentTimer = timer;
     currentTimeDomain = timeDomain;
     try {
@@ -252,6 +260,7 @@ public class FnApiDoFnRunner<InputT, OutputT>
 
   @Override
   public void finishBundle() {
+    LOG.debug("DANOLIVEIRA: [FnApiDoFnRunner] finishBundle executed.");
     doFnInvoker.invokeFinishBundle(finishBundleContext);
 
     // TODO: Support caching state data across bundle boundaries.
