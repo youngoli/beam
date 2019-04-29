@@ -13,6 +13,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*
+	Package errors contains functions for creating errors with improved
+	formatting.
+
+	Errors are created using errors.New and errors.Errorf, which are intended to
+	replace all usages of the standard Go functions errors.New and fmt.New
+	respectively. New functionality is provided to improve support for wrapping
+	error messages and displaying top level errors.
+
+	An error message created by this package is formatted as follows:
+	
+	<Top Level error message>
+	Full error:
+		<Context messages>
+		<Context messages>
+	<Error message>
+	Caused by:
+		<Context messages>
+		<Context messages>
+	<Error message>
+
+	When wrapping error messages, error messages are differentiated from context
+	messages. An error message describes what went went wrong while a context
+	message describes what was happening when an error occurred. Error messages
+	are added with Wrap while context messages are added with WithContext.
+
+	A top level error message is the first error message shown to a user when an
+	error message from this package is printed. A top level message is used to
+	communicate a user friendly description of an error, or describe how to fix
+	an error if possible. It can be set with SetTopLevelMsg. If it is not set then
+	it will default to showing the original error in the chain. Top level error
+	messages are preserved when an error is wrapped, so that using Wrap or
+	WithContext will not erase a custom top level error message.
+*/
 package errors
 
 import (
