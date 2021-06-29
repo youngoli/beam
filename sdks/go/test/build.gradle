@@ -181,7 +181,7 @@ ext.goIoValidatesRunnerTask = { proj, name, scriptOpts ->
       if (project.jenkins.isCIBuild) { // Needed when running this task on Jenkins.
         options.add("--jenkins")
       }
-      options = options + scriptOps.join(' ')
+      options = options + scriptOpts.join(' ')
       exec {
         executable "sh"
         args "-c", "./run_validatesrunner_tests.sh ${options.join(' ')}"
