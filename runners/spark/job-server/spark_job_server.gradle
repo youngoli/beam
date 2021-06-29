@@ -239,7 +239,8 @@ createCrossLanguageValidatesRunnerTask(
     "--experiments=beam_fn_api",
   ],
   goScriptOptions: [
-      "--runner spark",
-      "--tests \"./sdks/go/test/integration/xlang ./sdks/go/test/integration/io/xlang/...\"",
+    "--runner spark",
+    "--tests \"./sdks/go/test/integration/xlang ./sdks/go/test/integration/io/xlang/...\"",
+    "--endpoint localhost:${jobPort}",
   ],
 )

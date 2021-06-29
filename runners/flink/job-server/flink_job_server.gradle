@@ -252,6 +252,7 @@ createCrossLanguageValidatesRunnerTask(
   goScriptOptions: [
     "--runner flink",
     "--tests \"./sdks/go/test/integration/xlang ./sdks/go/test/integration/io/xlang/...\"",
+    "--endpoint localhost:${jobPort}",
   ],
 )
 
