@@ -2194,7 +2194,7 @@ class BeamModulePlugin implements Plugin<Project> {
         "--io_expansion_addr ${javaPort}",
       ]
       scriptOptions.addAll(config.goScriptOptions)
-      def goTask = project.project(":sdks:go:test:").goIoValidatesRunnerTask(project, config.name+"GoUsingJava", Exec, scriptOptions)
+      def goTask = project.project(":sdks:go:test:").goIoValidatesRunnerTask(project, config.name+"GoUsingJava", scriptOptions)
       goTask.description = "Validates runner for cross-language capability of using Java transforms from Go SDK"
       goTask.dependsOn setupTask
       goTask.dependsOn config.startJobServer
